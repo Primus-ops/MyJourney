@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.myjourney"
-        minSdk = 33
+        minSdk = 30
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -52,6 +52,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation("androidx.navigation:navigation-compose:2.5.3") //for navigation among pages
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
@@ -63,6 +66,19 @@ dependencies {
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.transport.api)
+
+    // Networking
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+
+    // Image Loading
+    implementation(libs.coil.kt.compose)
+
+    // Security (for token storage)
+    implementation(libs.security.crypto)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

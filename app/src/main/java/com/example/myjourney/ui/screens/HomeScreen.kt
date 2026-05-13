@@ -25,18 +25,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myjourney.MyJourneyApplication
 import com.example.myjourney.R
 import com.example.myjourney.model.JournalEntry
 import com.example.myjourney.ui.components.AddFAB
 import com.example.myjourney.ui.components.BottomNavigationBar
 import com.example.myjourney.ui.components.JournalCard
 import com.example.myjourney.ui.components.SearchBar
+import com.example.myjourney.viewmodel.JournalViewModel
+import com.example.myjourney.viewmodel.JournalsState
+import com.example.myjourney.viewmodel.ViewModelFactory
 
 
 @SuppressLint("ResourceType")
 @Composable
 fun HomeScreen(navController: NavController) {
+    val context = LocalContext.current
+    val app = context.applicationContext as MyJourneyApplication
+    val viewModel: JournalViewModel = viewModel(factory = ViewModelFactory(app.tokenManager))
+    
+    val journalsState by viewModel.journalsState.collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -81,58 +91,43 @@ fun HomeScreen(navController: NavController) {
                     )
                 }
 
-                //Journal Entries {
-                item {
-                    JournalCard(
-                        JournalEntry = JournalEntry(
-                            imageResId = R.drawable.image1,
-                            title = R.string.title,
-                            subtitle = R.string.subtitle,
-                            description = R.string.description,
-                            year = R.string.year,
-                            ),
-                            navController = navController
-                    )
+                //Journal Entries
+                when (val state = journalsState) {
+                    is JournalsState.Loading -> {
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                    is JournalsState.Error -> {
+                        item {
+                            Text(
+                                text = state.message,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+                    is JournalsState.Success -> {
+                        items(state.journals.size) { index ->
+                            JournalCard(
+                                JournalEntry = state.journals[index],
+                                navController = navController
+                            )
+                        }
+                        
+                        if (state.journals.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "No journals found. Start writing your journey!",
+                                    modifier = Modifier.padding(16.dp),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
                 }
-
-                    item {
-                        JournalCard(
-                            JournalEntry = JournalEntry(
-                                imageResId = R.drawable.image2,
-                                title = R.string.title2,
-                                subtitle = R.string.subtitle2,
-                                description = R.string.description2,
-                                year = R.string.year2
-                            ),
-                            navController = navController
-                        )
-                    }
-
-                    item {
-                        JournalCard(
-                            JournalEntry = JournalEntry(
-                                imageResId = R.drawable.image3,
-                                title = R.string.title3,
-                                subtitle = R.string.subtitle3,
-                                description = R.string.description3,
-                                year = R.string.year3
-                            ),
-                            navController = navController
-                        )
-                    }
-
-                    item {
-                        JournalCard(
-                            JournalEntry = JournalEntry(
-                                imageResId = R.drawable.image4,
-                                title = R.string.title4,
-                                subtitle = R.string.subtitle4,
-                                description = R.string.description4,
-                                year = R.string.year4
-                            ),
-                            navController = navController
-                        )
-                    }
 
                 item {
                     Spacer(modifier = Modifier.height(16.dp))

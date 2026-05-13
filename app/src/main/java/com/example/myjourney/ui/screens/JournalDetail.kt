@@ -41,6 +41,7 @@ import androidx.navigation.NavController
 import com.example.myjourney.R
 import com.example.myjourney.model.JournalEntry
 import com.example.myjourney.ui.theme.MyJourneyTheme
+import coil.compose.AsyncImage
 
 @SuppressLint("ResourceType")
 @Composable
@@ -64,7 +65,7 @@ fun JournalDetail(modifier: Modifier = Modifier, journalEntry: JournalEntry, nav
                 }
 
                 Text(
-                    text = stringResource(journalEntry.year),
+                    text = journalEntry.displayDate ?: journalEntry.entryDate,
                     modifier = Modifier
                         .padding(16.dp),
                     color = MaterialTheme.colorScheme.primary,
@@ -88,14 +89,27 @@ fun JournalDetail(modifier: Modifier = Modifier, journalEntry: JournalEntry, nav
 
             Box { //Image Box
 
-                //Image
-                Image(
-                    painter = painterResource(journalEntry.imageResId),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(320.dp)
-                )
+                if (journalEntry.coverImageUrl != null) {
+                    AsyncImage(
+                        model = journalEntry.coverImageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                            .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
+                    )
+                } else if (journalEntry.imageResId != null) {
+                    Image(
+                        painter = painterResource(journalEntry.imageResId),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                            .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
+                    )
+                }
 
             }
 
@@ -106,8 +120,10 @@ fun JournalDetail(modifier: Modifier = Modifier, journalEntry: JournalEntry, nav
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = stringResource(journalEntry.title),
-                        style = MaterialTheme.typography.headlineSmall
+                        text = journalEntry.title,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
@@ -118,16 +134,9 @@ fun JournalDetail(modifier: Modifier = Modifier, journalEntry: JournalEntry, nav
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = stringResource(journalEntry.subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    text = stringResource(journalEntry.description),
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = journalEntry.content,
+                    style = MaterialTheme.typography.bodyLarge,
+                    lineHeight = 24.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -173,11 +182,12 @@ fun JournalDetailPreview() {
     MyJourneyTheme() {
         JournalDetail(
             journalEntry = JournalEntry(
-                imageResId = R.drawable.image2,
-                title = R.string.title2,
-                subtitle = R.string.subtitle2,
-                description = R.string.description2,
-                year = R.string.year2
+                id = 1,
+                title = "Story Title",
+                subtitle = "Story Subtitle",
+                description = "This is a detailed description of the story.",
+                year = "2024",
+                imageResId = R.drawable.image2
             ),
             navController = NavController(LocalContext.current)
         )

@@ -42,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.myjourney.model.JournalEntry
@@ -63,15 +64,25 @@ fun JournalCard(JournalEntry: JournalEntry, navController: NavController, modifi
                     "${Screen.JournalDetail.route}/${JournalEntry.title}")
             }
     ) {
-        Image(
-            painter = painterResource(JournalEntry.imageResId),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(290.dp),
-
-        )
+        if (JournalEntry.coverImageUrl != null) {
+            AsyncImage(
+                model = JournalEntry.coverImageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(290.dp)
+            )
+        } else if (JournalEntry.imageResId != null) {
+            Image(
+                painter = painterResource(JournalEntry.imageResId),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(290.dp)
+            )
+        }
 
         Row(
             modifier = Modifier
@@ -120,7 +131,7 @@ fun JournalCard(JournalEntry: JournalEntry, navController: NavController, modifi
                     verticalAlignment = Alignment.CenterVertically) {
 
                     Text(
-                        text = stringResource(JournalEntry.title),
+                        text = JournalEntry.title,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f)
@@ -150,7 +161,7 @@ fun JournalCard(JournalEntry: JournalEntry, navController: NavController, modifi
                 //Subtitle
 
                 Text(
-                    text = stringResource(JournalEntry.subtitle),
+                    text = JournalEntry.subtitle ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
@@ -168,10 +179,10 @@ fun JournalCard(JournalEntry: JournalEntry, navController: NavController, modifi
                     Spacer(modifier = Modifier.width(6.dp))
                     //note Icon
                     Text(
-                        text = stringResource(JournalEntry.description),
+                        text = JournalEntry.content,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary
-                    ) //Event count
+                    )
                 }
             }
     }

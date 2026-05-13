@@ -1,20 +1,44 @@
 package com.example.myjourney.data
 
-import android.annotation.SuppressLint
 import com.example.myjourney.R
-import com.example.myjourney.R.string
 import com.example.myjourney.model.JournalEntry
 
-
-
+/**
+ * Data source for providing dummy journal entries.
+ * Updated to use Strings to match the Laravel API format.
+ */
 class DataSource {
-    @SuppressLint("ResourceType")
     fun loadJournalEntries(): List<JournalEntry> {
-        return listOf<JournalEntry>(
-            JournalEntry(R.string.title, R.string.subtitle, R.string.description, R.string.year, R.drawable.image1),
-            JournalEntry(R.string.title2, R.string.subtitle2, R.string.description2, R.string.year2, R.drawable.image2),
-            JournalEntry(R.string.title3, R.string.subtitle3, R.string.description3, R.string.year3, R.drawable.image3),
-            JournalEntry(R.string.title4, R.string.subtitle4, R.string.description4, R.string.year4, R.drawable.image4)
+        return listOf(
+            JournalEntry(
+                id = 1,
+                title = "Morning at the Lake",
+                subtitle = "Peaceful start",
+                content = "Today I went to the lake at 6 AM. The water was like glass and the air was crisp. I feel so refreshed and ready for the day.",
+                entryDate = "2023-10-24",
+                displayDate = "Oct 24, 2023",
+                imageResId = R.drawable.morning_lake, // Assuming you have this drawable
+                isFavorite = true
+            ),
+            JournalEntry(
+                id = 2,
+                title = "Hike up the Peak",
+                subtitle = "Hard but worth it",
+                content = "The climb was steeper than I expected, but the view from the top was incredible. I can see the whole valley from here.",
+                entryDate = "2023-10-22",
+                displayDate = "Oct 22, 2023",
+                imageResId = R.drawable.mountain_hike
+            ),
+            JournalEntry(
+                id = 3,
+                title = "Rainy Day Reading",
+                subtitle = "Cozy vibes",
+                content = "It's been raining all day. I spent the afternoon reading my favorite book by the window. Perfect day for some introspection.",
+                entryDate = "2023-10-20",
+                displayDate = "Oct 20, 2023",
+                imageResId = R.drawable.rainy_reading,
+                isFavorite = true
+            )
         )
     }
 }

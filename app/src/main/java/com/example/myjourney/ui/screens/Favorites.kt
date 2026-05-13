@@ -57,45 +57,14 @@ fun FavoriteScreen(navController: NavController) {
                 )
             }
 
-            //Journal Entries
-                item {
-                    JournalCard(
-                        JournalEntry = JournalEntry(
-                            imageResId = R.drawable.image1,
-                            title = R.string.title,
-                            subtitle = R.string.subtitle,
-                            description = R.string.description,
-                            year = R.string.year,
-                        ),
-                        navController = navController
-                    )
-                }
-
-                item {
-                    JournalCard(
-                        JournalEntry = JournalEntry(
-                            imageResId = R.drawable.image2,
-                            title = R.string.title2,
-                            subtitle = R.string.subtitle2,
-                            description = R.string.description2,
-                            year = R.string.year2
-                        ),
-                        navController = navController
-                    )
-                }
-
-                item {
-                    JournalCard(
-                        JournalEntry = JournalEntry(
-                            imageResId = R.drawable.image3,
-                            title = R.string.title3,
-                            subtitle = R.string.subtitle3,
-                            description = R.string.description3,
-                            year = R.string.year3
-                        ),
-                        navController = navController
-                    )
-                }
+            //Journal Entries (Filtered for Favorites)
+            val entries = com.example.myjourney.data.DataSource().loadJournalEntries().filter { it.isFavorite }
+            items(entries.size) { index ->
+                JournalCard(
+                    JournalEntry = entries[index],
+                    navController = navController
+                )
+            }
             }
         }
     }

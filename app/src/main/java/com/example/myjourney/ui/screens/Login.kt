@@ -32,16 +32,36 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myjourney.MyJourneyApplication
 import com.example.myjourney.ui.Navigation.Screen
+import com.example.myjourney.viewmodel.LoginState
+import com.example.myjourney.viewmodel.LoginViewModel
+import com.example.myjourney.viewmodel.ViewModelFactory
 
 @Composable
 fun LoginScreen(navController: NavController) {
+    val context = LocalContext.current
+    val app = context.applicationContext as MyJourneyApplication
+    val viewModel: LoginViewModel = viewModel(factory = ViewModelFactory(app.tokenManager))
+    
+    val loginState by viewModel.loginState.collectAsState()
+    
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    // Navigate on Success
+    LaunchedEffect(loginState) {
+        if (loginState is LoginState.Success) {
+            navController.navigate(Screen.HomeScreen.route) {
+                popUpTo(Screen.Login.route) { inclusive = true }
+            }
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -104,23 +124,38 @@ fun LoginScreen(navController: NavController) {
             }
         }
 
+        if (loginState is LoginState.Error) {
+            Text(
+                text = (loginState as LoginState.Error).message,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = {
-                navController.navigate(Screen.HomeScreen.route) { //Navigate to Home and Clear the login from backstack
-                    popUpTo (Screen.Login.route){ inclusive = true }
-                }
-            },
+            onClick = { viewModel.login(email, password) },
+            enabled = loginState !is LoginState.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(text = stringResource(com.example.myjourney.R.string.login_name),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+            if (loginState is LoginState.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = stringResource(com.example.myjourney.R.string.login_name),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

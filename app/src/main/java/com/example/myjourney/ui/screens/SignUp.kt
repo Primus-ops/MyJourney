@@ -99,7 +99,7 @@ fun SignUpScreen(navController: NavController) {
 
         Button(
             onClick = {
-                navController.navigate(Screen.HomeScreen.route) { //Navigate to Home and clear stack
+                navController.navigate(Screen.Login.route) { //Navigate to Home and clear stack
                     popUpTo(Screen.SignUp.route) {inclusive = true}
                 }
             },

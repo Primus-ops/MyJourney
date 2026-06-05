@@ -10,10 +10,13 @@ sealed class Screen (val route: String) {
 
     object JournalDetail : Screen("journalDetail")
 
+    object EditJournal : Screen("editJournal")
 
     object Login : Screen("login")
 
     object SignUp : Screen("signup")
+
+    object LibraryList : Screen("library_list")
 }
 
 

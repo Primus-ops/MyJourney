@@ -9,37 +9,134 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel for the Home and Favorites screens.
- * Manages the state of journal entries fetched from the backend.
+ * JournalViewModel
+ * 
+ * Part of the MVVM structure. It handles loading and mutation operations for the user's
+ * journal memories. It exposes states as reactive StateFlow objects, enabling Jetpack Compose UI
+ * elements to seamlessly observe live state changes and redraw without boilerplate.
  */
 class JournalViewModel(private val repository: JournalRepository) : ViewModel() {
 
+    // Backing field to manage full journal collection updates internally
     private val _journalsState = MutableStateFlow<JournalsState>(JournalsState.Loading)
+    // Read-only StateFlow exposed to the UI screens
     val journalsState: StateFlow<JournalsState> = _journalsState
 
+    // Search logic: query and filtered results
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    // Backing field to manage individual journal updates (e.g. Details View)
+    private val _singleJournalState = MutableStateFlow<JournalsState>(JournalsState.Loading)
+    // Read-only StateFlow exposed to details viewer
+    val singleJournalState: StateFlow<JournalsState> = _singleJournalState
+
+    /**
+     * Updates the search filter and triggers a UI refresh
+     */
+    fun onSearchQueryChange(newQuery: String) {
+        _searchQuery.value = newQuery
+    }
+
     init {
+        // Automatically request fresh listing data on initialization
         fetchJournals()
     }
 
-    fun fetchJournals() {
+    /**
+     * Executes an asynchronous network call via Kotlin Coroutines on a background pool
+     * to fetch all live journals and update the StateFlow value. Automatically utilizes
+     * local JSON caching if an Android context is provided and connection fails.
+     */
+    fun fetchJournals(context: android.content.Context? = null) {
         viewModelScope.launch {
             _journalsState.value = JournalsState.Loading
             try {
-                val response = repository.getJournals()
-                if (response.isSuccessful && response.body() != null) {
-                    _journalsState.value = JournalsState.Success(response.body()!!)
+                val response = if (context != null) {
+                    repository.getJournalsWithCache(context)
                 } else {
-                    _journalsState.value = JournalsState.Error("Failed to load journals: ${response.message()}")
+                    repository.getJournals()
+                }
+                if (response.isSuccessful && response.body() != null) {
+                    _journalsState.value = JournalsState.Success(response.body()!!.data)
+                } else {
+                    _journalsState.value = JournalsState.Error("Failed to load: ${response.message()}")
                 }
             } catch (e: Exception) {
-                _journalsState.value = JournalsState.Error(e.message ?: "An unknown error occurred")
+                _journalsState.value = JournalsState.Error(e.message ?: "Network error")
+            }
+        }
+    }
+
+    /**
+     * Dispatches a request to star/favorite a memory. Upon API response success,
+     * it refreshes the dynamic UI listings to reflect the updated favorite state.
+     */
+    fun toggleFavorite(journalId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = repository.toggleFavorite(journalId)
+                if (response.isSuccessful) {
+                    fetchJournals() // Refresh the list
+                }
+            } catch (e: Exception) {
+                // Handle error quietly or display message
+            }
+        }
+    }
+
+    /**
+     * Handles memory deletion. Before calling the DELETE request on the server,
+     * it saves a local fallback copy in the phone's "Recently Deleted" trash bin
+     * inside the SharedPreferences database to support native Restores.
+     */
+    fun deleteJournal(journalId: Int, context: android.content.Context) {
+        viewModelScope.launch {
+            try {
+                // Find and cache the entry locally before deleting from the backend
+                val entryToCache = (journalsState.value as? JournalsState.Success)?.journals?.find { it.id == journalId }
+                if (entryToCache != null) {
+                    val localLibraryManager = com.example.myjourney.data.local.LocalLibraryManager(context)
+                    localLibraryManager.saveRecentlyDeleted(entryToCache)
+                }
+
+                val response = repository.deleteJournal(journalId)
+                if (response.isSuccessful) {
+                    fetchJournals() // Refresh the list
+                }
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+
+    /**
+     * Fetches detailed data for a specific entry ID. Emits SingleSuccess upon a correct response.
+     */
+    fun fetchJournalById(id: Int) {
+        viewModelScope.launch {
+            _singleJournalState.value = JournalsState.Loading
+            try {
+                val response = repository.getJournalById(id)
+                if (response.isSuccessful && response.body() != null) {
+                    _singleJournalState.value = JournalsState.SingleSuccess(response.body()!!.data)
+                } else {
+                    _singleJournalState.value = JournalsState.Error("Failed to load journal")
+                }
+            } catch (e: Exception) {
+                _singleJournalState.value = JournalsState.Error("Network error")
             }
         }
     }
 }
 
+/**
+ * Sealed class representing possible state flows for the UI.
+ * This guarantees type-safe states during compile and runtime.
+ */
 sealed class JournalsState {
     object Loading : JournalsState()
     data class Success(val journals: List<JournalEntry>) : JournalsState()
+    data class SingleSuccess(val journal: JournalEntry) : JournalsState()
     data class Error(val message: String) : JournalsState()
 }

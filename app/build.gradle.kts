@@ -6,9 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.myjourney"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.myjourney"
@@ -42,6 +40,7 @@ android {
 }
 
 dependencies {
+    // --- Core Android & Compose ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -50,35 +49,40 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation("androidx.navigation:navigation-compose:2.5.3") //for navigation among pages
-    implementation("androidx.compose.material:material-icons-extended")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.compose.ui.text.google.fonts)
-    implementation(libs.androidx.espresso.core)
-    implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.ui.text)
+    
+    // --- Navigation (Unified version from catalog) ---
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.transport.api)
+    implementation(libs.androidx.navigation.runtime.ktx)
 
-    // Networking
+    // --- Networking (Retrofit & OkHttp) ---
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
-    // Image Loading
+    // --- Image Loading (Coil) ---
     implementation(libs.coil.kt.compose)
 
-    // Security (for token storage)
+    // --- Security & Storage ---
     implementation(libs.security.crypto)
 
+    // --- Icons & UI Extras ---
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.compose.ui.text.google.fonts)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    
+    // --- Location & Sensors ---
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    
+    // --- Google Auth & Identity ---
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    
+    // --- Testing ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

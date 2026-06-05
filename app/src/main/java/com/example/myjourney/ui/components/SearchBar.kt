@@ -34,8 +34,10 @@ import com.example.myjourney.ui.theme.MyJourneyTheme
 import kotlin.math.sin
 
 @Composable
-fun SearchBar() {
-    var query by remember { mutableStateOf("") }
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -61,7 +63,7 @@ fun SearchBar() {
 
             TextField(
                 value = query,
-                onValueChange = { query = it },
+                onValueChange = onQueryChange,
                 placeholder = {
                     Text(stringResource(R.string.search_hint))
                 },
@@ -80,10 +82,3 @@ fun SearchBar() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun SearchBarPreview() {
-    MyJourneyTheme {
-        SearchBar()
-    }
-}

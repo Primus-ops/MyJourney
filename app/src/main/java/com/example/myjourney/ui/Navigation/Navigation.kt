@@ -12,13 +12,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.myjourney.data.DataSource
 import com.example.myjourney.ui.components.BottomNavigationBar
 import com.example.myjourney.ui.screens.CreateScreen
+import com.example.myjourney.ui.screens.EditJournalScreen
 import com.example.myjourney.ui.screens.FavoriteScreen
 import com.example.myjourney.ui.screens.HomeScreen
 import com.example.myjourney.ui.screens.JournalDetail
 import com.example.myjourney.ui.screens.LibraryScreen
+import com.example.myjourney.ui.screens.LibraryListScreen
 import com.example.myjourney.ui.screens.LoginScreen
 import com.example.myjourney.ui.screens.ProfileScreen
 import com.example.myjourney.ui.screens.SignUpScreen
@@ -62,6 +63,16 @@ fun AppNavigation(
         composable(Screen.Library.route) {
             LibraryScreen(navController)
         }
+        composable(
+            route = "${Screen.LibraryList.route}/{type}",
+            arguments = listOf(navArgument("type") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val type = backStackEntry.arguments?.getString("type") ?: "drafts"
+            LibraryListScreen(
+                type = type,
+                navController = navController
+            )
+        }
         composable(Screen.Profile.route) {
             ProfileScreen(
                 navController = navController,
@@ -76,18 +87,24 @@ fun AppNavigation(
 
         composable( //Journal Detail
             route = "${Screen.JournalDetail.route}/{journalId}",
-            arguments = listOf(navArgument("journalId") { type = NavType.StringType })
+            arguments = listOf(navArgument("journalId") { type = NavType.IntType })
         ) { backStackEntry ->
-            val journalId = backStackEntry.arguments?.getString("journalId")
+            val journalId = backStackEntry.arguments?.getInt("journalId") ?: 0
+            JournalDetail(
+                entryId = journalId,
+                navController = navController
+            )
+        }
 
-            val journalEntry =
-                DataSource().loadJournalEntries().find { it.title.toString() == journalId }
-            if (journalEntry != null) {
-                JournalDetail(
-                    journalEntry = journalEntry,
-                    navController = navController
-                )
-            }
+        composable( // Edit Journal
+            route = "${Screen.EditJournal.route}/{journalId}",
+            arguments = listOf(navArgument("journalId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val journalId = backStackEntry.arguments?.getInt("journalId") ?: 0
+            EditJournalScreen(
+                journalId = journalId,
+                navController = navController
+            )
         }
     }
 }

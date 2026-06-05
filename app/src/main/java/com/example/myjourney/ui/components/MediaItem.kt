@@ -22,6 +22,7 @@ import com.example.myjourney.ui.theme.MyJourneyTheme
 fun MediaItem(
     imageRes: Int,
     modifier: Modifier = Modifier,
+    imageUrl: String? = null,
     onClick: () -> Unit = {}
 ) {
     Surface(
@@ -30,12 +31,21 @@ fun MediaItem(
         onClick = onClick,
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        Image( //All media items will be images
-            painter = painterResource(id = imageRes),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (imageUrl != null) {
+            coil.compose.AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else if (imageRes != -1) {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 

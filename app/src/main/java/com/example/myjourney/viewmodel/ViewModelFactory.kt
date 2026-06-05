@@ -21,7 +21,20 @@ class ViewModelFactory(private val tokenManager: TokenManager) : ViewModelProvid
                 val repository = JournalRepository(RetrofitClient.apiService)
                 JournalViewModel(repository) as T
             }
-            // Add other ViewModels here as we create them
+            modelClass.isAssignableFrom(EditJournalViewModel::class.java) -> {
+                val repository = JournalRepository(RetrofitClient.apiService)
+                EditJournalViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(CreateJournalViewModel::class.java) -> {
+                val repository = JournalRepository(RetrofitClient.apiService)
+                CreateJournalViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(SignUpViewModel::class.java) -> {
+                SignUpViewModel(tokenManager) as T
+            }
+            modelClass.isAssignableFrom(ProfileViewModel::class.java) -> {
+                ProfileViewModel(tokenManager) as T
+            }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }
     }

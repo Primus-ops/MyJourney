@@ -24,33 +24,48 @@ class LocationHelper(private val context: Context) {
     @SuppressLint("MissingPermission")
     fun getCurrentLocation(onLocationResult: (String) -> Unit) {
         try {
+            // First try to get the fresh current location (High Accuracy)
             fusedLocationClient.getCurrentLocation(
                 Priority.PRIORITY_HIGH_ACCURACY,
                 null
             ).addOnSuccessListener { location ->
                 if (location != null) {
-                    val lat = location.latitude
-                    val lon = location.longitude
-                    
-                    // Convert coordinates to a City name
-                    val geocoder = Geocoder(context, Locale.getDefault())
-                    val addresses = geocoder.getFromLocation(lat, lon, 1)
-                    
-                    if (!addresses.isNullOrEmpty()) {
-                        val city = addresses[0].locality ?: addresses[0].subAdminArea ?: "Unknown City"
-                        val country = addresses[0].countryName ?: ""
-                        onLocationResult("$city, $country")
-                    } else {
-                        onLocationResult("Location: $lat, $lon")
-                    }
+                    processLocation(location, onLocationResult)
                 } else {
-                    onLocationResult("Location unavailable")
+                    // Fallback: Try "Last Known Location" if fresh one is slow
+                    fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
+                        if (lastLoc != null) {
+                            processLocation(lastLoc, onLocationResult)
+                        } else {
+                            onLocationResult("Location unavailable")
+                        }
+                    }
                 }
             }.addOnFailureListener {
                 onLocationResult("Failed to get location")
             }
         } catch (e: Exception) {
             onLocationResult("Location error")
+        }
+    }
+
+    private fun processLocation(location: android.location.Location, onLocationResult: (String) -> Unit) {
+        val lat = location.latitude
+        val lon = location.longitude
+        
+        // Convert coordinates to a City name
+        val geocoder = Geocoder(context, Locale.getDefault())
+        try {
+            val addresses = geocoder.getFromLocation(lat, lon, 1)
+            if (!addresses.isNullOrEmpty()) {
+                val city = addresses[0].locality ?: addresses[0].subAdminArea ?: "Unknown City"
+                val country = addresses[0].countryName ?: ""
+                onLocationResult("$city, $country")
+            } else {
+                onLocationResult("Location: $lat, $lon")
+            }
+        } catch (e: Exception) {
+            onLocationResult("Location: $lat, $lon")
         }
     }
 }

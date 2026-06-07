@@ -33,6 +33,8 @@ import com.example.myjourney.viewmodel.JournalViewModel
 import com.example.myjourney.viewmodel.JournalsState
 import com.example.myjourney.viewmodel.ViewModelFactory
 
+import com.example.myjourney.ui.Navigation.Screen
+
 @SuppressLint("ResourceType")
 @Composable
 fun JournalDetail(
@@ -74,7 +76,9 @@ fun JournalDetail(
                     )
                 }
 
-                Button(onClick = { /*Edit*/ }) {
+                Button(onClick = { 
+                    navController.navigate("${Screen.EditJournal.route}/$entryId")
+                }) {
                     Text(text = stringResource(R.string.edit_journal))
                 }
             }

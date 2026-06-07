@@ -12,18 +12,18 @@ import retrofit2.converter.gson.GsonConverterFactory
  */
 object RetrofitInstance {
 
-    // 10.0.2.2 is the special IP address mapped by the Android emulator to access your laptop's localhost
-    private const val BASE_URL = "http://51.20.108.153/api/"
+    // http://10.0.2.2 is the special IP address mapped by the Android emulator to access your laptop's localhost
+    private const val BASE_URL = "http://51.20.108.153/api/" // hosted link to Laravel backend
 
     /**
      * Lazy-initialized Retrofit ApiService instance.
      * Initiated only when accessed for the first time in memory, optimizing performance.
      */
-    val api: ApiService by lazy {
+    val api: ApiService by lazy { // Lazy-initialized Retrofit ApiService instance to be used by other classes
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create()) // Use Gson for JSON deserialization
             .build()
-            .create(ApiService::class.java)
+            .create(ApiService::class.java) // Create the ApiService interface
     }
 }

@@ -28,11 +28,27 @@ class LoginViewModel(private val tokenManager: TokenManager) : ViewModel() {
                     tokenManager.saveToken(token)
                     _loginState.value = LoginState.Success
                 } else {
-                    _loginState.value = LoginState.Error("Login failed: ${response.message()}")
+                    // Extract detailed error message from JSON body (e.g., "The provided credentials do not match our records.")
+                    val errorBody = response.errorBody()?.string()
+                    val errorMessage = extractMessageFromJson(errorBody) ?: "Login failed: ${response.message()}"
+                    _loginState.value = LoginState.Error(errorMessage)
                 }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error(e.message ?: "Unknown error occurred")
             }
+        }
+    }
+
+    /**
+     * Simple parser to extract the "message" field from Laravel's error JSON.
+     */
+    private fun extractMessageFromJson(json: String?): String? {
+        if (json == null) return null
+        return try {
+            val jsonObject = org.json.JSONObject(json)
+            jsonObject.optString("message", null)
+        } catch (e: Exception) {
+            null
         }
     }
 }

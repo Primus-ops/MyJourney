@@ -82,7 +82,7 @@ fun AppNavigation(
         }
 
         composable(Screen.CreateJournal.route) {
-            CreateScreen(navController)
+            CreateScreen(navController, isDarkMode)
         }
 
         composable( //Journal Detail

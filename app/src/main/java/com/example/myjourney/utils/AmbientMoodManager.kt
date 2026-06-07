@@ -10,27 +10,27 @@ import android.hardware.SensorManager
  * AmbientMoodManager
  * 
  * Uses the phone's Light Sensor (Photometer) to detect the surrounding 
- * environment brightness and translate it into a "Mood."
+ * environment brightness and translate it into a "Mood" and a Theme suggestion.
  */
 class AmbientMoodManager(context: Context) : SensorEventListener {
 
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
     
-    private var onMoodChanged: ((String) -> Unit)? = null
+    private var onMoodChangedWithLux: ((String, Float) -> Unit)? = null
 
     /**
-     * Starts listening to light changes.
+     * Starts listening to light changes with the fastest response rate.
      */
-    fun start(callback: (String) -> Unit) {
-        onMoodChanged = callback
+    fun start(callback: (String, Float) -> Unit) {
+        onMoodChangedWithLux = callback
         lightSensor?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
-        } ?: callback("Mood sensor unavailable")
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_FASTEST)
+        } ?: callback("Mood sensor unavailable", 0f)
     }
 
     /**
-     * Stops the sensor to save battery.
+     * Stops the sensor.
      */
     fun stop() {
         sensorManager.unregisterListener(this)
@@ -40,12 +40,12 @@ class AmbientMoodManager(context: Context) : SensorEventListener {
         if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
             val lux = event.values[0]
             val mood = when {
-                lux < 10 -> "Moonlit Mood 🌙"       // Deep/Dark room
+                lux < 15 -> "Moonlit Mood 🌙"       // Deep/Dark room
                 lux < 100 -> "Cozy Indoors 🛋️"      // Normal indoor light
                 lux < 1000 -> "Bright Studio 🎨"      // Bright office/daylight
                 else -> "Brilliant Outdoors ☀️"       // Direct sunlight
             }
-            onMoodChanged?.invoke(mood)
+            onMoodChangedWithLux?.invoke(mood, lux)
         }
     }
 

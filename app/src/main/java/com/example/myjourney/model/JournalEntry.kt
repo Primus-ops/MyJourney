@@ -28,5 +28,5 @@ data class JournalPhoto(
 ) {
     // Automatically prepends the base URL if the path is relative (starts with /storage)
     val absoluteUrl: String // Automatically gets the full URL
-        get() = if (url.startsWith("/")) "http://10.0.2.2:8000$url" else url // Laravel's base URL
+        get() = if (url.startsWith("/")) "http://51.20.108.153$url" else url // AWS server base URL
 }

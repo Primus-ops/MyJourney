@@ -27,8 +27,8 @@ interface ApiService {
      * Authenticates an existing user credentials block.
      * Returns a JSON envelope with user details and a secure Sanctum token.
      */
-    @POST("api/login")
-    suspend fun login(
+    @POST("api/login") // POST request to /api/login
+    suspend fun login( // Suspend function to make it asynchronous
         @Body request: LoginRequest
     ): Response<LoginResponse>
 
@@ -36,16 +36,16 @@ interface ApiService {
      * Registers a brand new account inside the MySQL database via Laravel.
      * Returns the user details and their first Sanctum token.
      */
-    @POST("api/register")
+    @POST("api/register") // POST request to /api/register
     suspend fun register(
         @Body request: RegisterRequest
     ): Response<LoginResponse>
 
-    @POST("api/logout")
-    suspend fun logout(): Response<Unit>
+    @POST("api/logout") // POST request to /api/logout
+    suspend fun logout(): Response<Unit> // Logout endpoint returns no data
 
-    @GET("api/user")
-    suspend fun getUser(): Response<UserDto>
+    @GET("api/user") // GET request to /api/user
+    suspend fun getUser(): Response<UserDto> // Fetch user details
 
 
     // ==========================================
@@ -56,13 +56,13 @@ interface ApiService {
      * Fetches all live journal entries created by the currently authenticated user.
      * Returns a paginated list wrapped in a PaginatedResponse envelope.
      */
-    @GET("api/journal")
-    suspend fun getJournalEntries(): Response<PaginatedResponse<JournalEntry>>
+    @GET("api/journal") // GET request to /api/journal
+    suspend fun getJournalEntries(): Response<PaginatedResponse<JournalEntry>> //
 
     /**
      * Loads full detailed information for a single specific journal entry by its primary key ID.
      */
-    @GET("api/journal/{id}")
+    @GET("api/journal/{id}") // GET request to /api/journal/{id} : uses id of the journal entry
     suspend fun getJournalById(
         @Path("id") id: Int
     ): Response<SingleResponse<JournalEntry>>

@@ -16,8 +16,8 @@ import androidx.core.content.edit
 class TokenManager(context: Context) {
     
     // Master Key creation using Keystore keys with AES-256 Galois/Counter Mode (GCM) encryption
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+    private val masterKey = MasterKey.Builder(context) // masterKey for encrypting data
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM) // AES-256 GCM encryption
         .build()
 
     // Encrypted preferences instance which handles encryption of preference keys and values automatically
@@ -32,7 +32,7 @@ class TokenManager(context: Context) {
     /**
      * Saves the authenticated Sanctum bearer token securely into local storage.
      */
-    fun saveToken(token: String) {
+    fun saveToken(token: String) { // Securely saves the token
         prefs.edit { putString("api_token", token) }
     }
 
@@ -40,14 +40,14 @@ class TokenManager(context: Context) {
      * Retrieves the stored bearer token to authorize network requests.
      * Returns null if the user is logged out or unauthenticated.
      */
-    fun getToken(): String? {
+    fun getToken(): String? { // Securely retrieves the token
         return prefs.getString("api_token", null)
     }
 
     /**
      * Removes the stored bearer token, effectively ending the secure mobile session (Logout).
      */
-    fun deleteToken() {
+    fun deleteToken() { // Securely removes the token
         prefs.edit { remove("api_token") }
     }
 }

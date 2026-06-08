@@ -67,6 +67,11 @@ fun HomeScreen(navController: NavController) {
     val journalsState by viewModel.journalsState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
 
+    // NEW: Ensure we fetch with context so filtering works on launch
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.fetchJournals(context)
+    }
+
     // Scaffold manages standard material layouts like custom floating actions and bottom bars
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

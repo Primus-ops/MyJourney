@@ -33,8 +33,10 @@ class LoginViewModel(private val tokenManager: TokenManager) : ViewModel() {
                     val errorMessage = extractMessageFromJson(errorBody) ?: "Login failed: ${response.message()}"
                     _loginState.value = LoginState.Error(errorMessage)
                 }
+            } catch (e: java.io.IOException) {
+                _loginState.value = LoginState.Error("No internet connection. Please verify your Wi-Fi or data.")
             } catch (e: Exception) {
-                _loginState.value = LoginState.Error(e.message ?: "Unknown error occurred")
+                _loginState.value = LoginState.Error("Unable to reach the server. Please try again later.")
             }
         }
     }

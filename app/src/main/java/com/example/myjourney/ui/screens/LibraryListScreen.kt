@@ -244,9 +244,26 @@ fun LibraryListScreen(
                         Button(
                             onClick = {
                                 if (type == "drafts") {
-                                    createViewModel.createJournal(entry.title, entry.content, null)
+                                    // PUBLISH a draft: We need to convert the local photo URI back to a File if possible
+                                    val photoFile = entry.localPhotoPath?.let { uriString ->
+                                        try {
+                                            val uri = android.net.Uri.parse(uriString)
+                                            val tempFile = java.io.File(context.cacheDir, "temp_restore_${System.currentTimeMillis()}.jpg")
+                                            context.contentResolver.openInputStream(uri)?.use { input ->
+                                                tempFile.outputStream().use { output -> input.copyTo(output) }
+                                            }
+                                            tempFile
+                                        } catch (e: Exception) { null }
+                                    }
+                                    createViewModel.createJournal(entry.title, entry.content, photoFile)
                                 } else {
-                                    createViewModel.createJournal(entry.title, entry.content, null)
+                                    // RESTORE a deleted entry: Just remove from local trash and refresh Home
+                                    localLibraryManager.removeRecentlyDeleted(entry.id ?: 0)
+                                    localList = localLibraryManager.getRecentlyDeleted()
+                                    journalViewModel.fetchJournals(context)
+                                    showDialog = false
+                                    selectedEntry = null
+                                    Toast.makeText(context, "Memory restored!", Toast.LENGTH_SHORT).show()
                                 }
                             },
                             enabled = createState !is CreateJournalState.Loading
@@ -264,13 +281,24 @@ fun LibraryListScreen(
                                 if (type == "drafts") {
                                     localLibraryManager.deleteDraft(entry.id ?: 0)
                                     localList = localLibraryManager.getDrafts()
+                                    Toast.makeText(context, "Draft discarded.", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    localLibraryManager.removeRecentlyDeleted(entry.id ?: 0)
-                                    localList = localLibraryManager.getRecentlyDeleted()
+                                    // If it's a server entry (ID > 0), call permanent delete on AWS
+                                    if ((entry.id ?: 0) > 0) {
+                                        // NEW: We wait for the background task to finish before refreshing the list
+                                        journalViewModel.permanentDelete(entry.id!!, context)
+                                        // We will refresh the local list after a tiny delay or let the screen-wide LaunchedEffect handle it
+                                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                            localList = localLibraryManager.getRecentlyDeleted()
+                                        }, 1000) 
+                                    } else {
+                                        localLibraryManager.removeRecentlyDeleted(entry.id ?: 0)
+                                        localList = localLibraryManager.getRecentlyDeleted()
+                                    }
+                                    Toast.makeText(context, "Removed forever from AWS.", Toast.LENGTH_SHORT).show()
                                 }
                                 showDialog = false
                                 selectedEntry = null
-                                Toast.makeText(context, "Removed permanently.", Toast.LENGTH_SHORT).show()
                             },
                             enabled = createState !is CreateJournalState.Loading,
                             colors = ButtonDefaults.textButtonColors(

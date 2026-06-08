@@ -49,7 +49,14 @@ fun JournalCard(
                     .fillMaxWidth()
                     .height(200.dp)
             ) {
-                if (JournalEntry.coverImageUrl != null) {
+                if (JournalEntry.localPhotoPath != null) {
+                    AsyncImage(
+                        model = JournalEntry.localPhotoPath,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else if (JournalEntry.coverImageUrl != null) {
                     AsyncImage(
                         model = JournalEntry.coverImageUrl,
                         contentDescription = null,

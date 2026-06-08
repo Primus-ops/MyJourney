@@ -68,7 +68,7 @@ fun CreateScreen(
             // PANIC SHIELD TRIGGERED! 🛡️🤫
             if (title.isNotBlank() || content.isNotBlank()) {
                 val localLibraryManager = com.example.myjourney.data.local.LocalLibraryManager(context)
-                localLibraryManager.saveDraft(title, content)
+                localLibraryManager.saveDraft(title, content, imageUri?.toString())
             }
             navController.popBackStack()
         }
@@ -121,7 +121,7 @@ fun CreateScreen(
                             if (title.isNotBlank() || content.isNotBlank()) {
                                 val localLibraryManager =
                                     com.example.myjourney.data.local.LocalLibraryManager(context)
-                                localLibraryManager.saveDraft(title, content)
+                                localLibraryManager.saveDraft(title, content, imageUri?.toString())
                                 android.widget.Toast.makeText(
                                     context,
                                     "Draft saved locally!",

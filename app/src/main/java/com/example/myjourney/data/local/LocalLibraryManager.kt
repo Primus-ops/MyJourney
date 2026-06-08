@@ -15,9 +15,9 @@ class LocalLibraryManager(context: Context) {
     private val gson = Gson()
 
     // --- Drafts Management ---
-    fun getDrafts(): List<JournalEntry> {
-        val json = prefs.getString("local_drafts", null) ?: return emptyList()
-        val type = object : TypeToken<List<JournalEntry>>() {}.type
+    fun getDrafts(): List<JournalEntry> {  // This is a function that gets the drafts from the local storage
+        val json = prefs.getString("local_drafts", null) ?: return emptyList() 
+        val type = object : TypeToken<List<JournalEntry>>() {}.type 
         return try {
             gson.fromJson(json, type)
         } catch (e: Exception) {
@@ -25,7 +25,7 @@ class LocalLibraryManager(context: Context) {
         }
     }
 
-    fun saveDraft(title: String, content: String) {
+    fun saveDraft(title: String, content: String, photoPath: String? = null) { // saveDraft is a function that saves the draft to the local storage
         val drafts = getDrafts().toMutableList()
         val nextId = if (drafts.isEmpty()) -1 else drafts.minOf { it.id ?: 0 } - 1
         
@@ -34,6 +34,7 @@ class LocalLibraryManager(context: Context) {
             title = title,
             content = content,
             isFavorite = false,
+            localPhotoPath = photoPath,
             entryDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date()),
             displayDate = "Draft"
         )
@@ -41,7 +42,7 @@ class LocalLibraryManager(context: Context) {
         prefs.edit { putString("local_drafts", gson.toJson(drafts)) }
     }
 
-    fun deleteDraft(id: Int) {
+    fun deleteDraft(id: Int) { // deleteDraft deletes the draft from the local storage
         val drafts = getDrafts().filter { it.id != id }
         prefs.edit { putString("local_drafts", gson.toJson(drafts)) }
     }

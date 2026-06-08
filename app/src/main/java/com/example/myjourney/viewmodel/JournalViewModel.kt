@@ -58,7 +58,16 @@ class JournalViewModel(private val repository: JournalRepository) : ViewModel() 
                     repository.getJournals()
                 }
                 if (response.isSuccessful && response.body() != null) {
-                    _journalsState.value = JournalsState.Success(response.body()!!.data)
+                    var journals = response.body()!!.data
+                    
+                    // NEW: Filter out items that are currently in the "Recently Deleted" local trash
+                    if (context != null) {
+                        val localLibraryManager = com.example.myjourney.data.local.LocalLibraryManager(context)
+                        val deletedIds = localLibraryManager.getRecentlyDeleted().map { it.id }
+                        journals = journals.filter { it.id !in deletedIds }
+                    }
+                    
+                    _journalsState.value = JournalsState.Success(journals)
                 } else {
                     _journalsState.value = JournalsState.Error("Failed to load: ${response.message()}")
                 }
@@ -86,23 +95,39 @@ class JournalViewModel(private val repository: JournalRepository) : ViewModel() 
     }
 
     /**
-     * Handles memory deletion. Before calling the DELETE request on the server,
-     * it saves a local fallback copy in the phone's "Recently Deleted" trash bin
-     * inside the SharedPreferences database to support native Restores.
+     * Handles memory deletion. Matches the 'Soft Delete' pattern:
+     * It saves the entry to local trash and filters it from the UI immediately.
+     * The actual server-side deletion only happens when 'Delete Forever' is clicked.
      */
     fun deleteJournal(journalId: Int, context: android.content.Context) {
         viewModelScope.launch {
             try {
-                // Find and cache the entry locally before deleting from the backend
                 val entryToCache = (journalsState.value as? JournalsState.Success)?.journals?.find { it.id == journalId }
                 if (entryToCache != null) {
                     val localLibraryManager = com.example.myjourney.data.local.LocalLibraryManager(context)
                     localLibraryManager.saveRecentlyDeleted(entryToCache)
+                    
+                    // Refresh the list immediately to "hide" the journal from the Home screen
+                    fetchJournals(context)
                 }
+            } catch (e: Exception) {
+                // Silent fail
+            }
+        }
+    }
 
+    /**
+     * PERMANENTLY deletes from the backend.
+     * Use this only when purging from the "Recently Deleted" trash.
+     */
+    fun permanentDelete(journalId: Int, context: android.content.Context) {
+        viewModelScope.launch {
+            try {
                 val response = repository.deleteJournal(journalId)
                 if (response.isSuccessful) {
-                    fetchJournals() // Refresh the list
+                    val localLibraryManager = com.example.myjourney.data.local.LocalLibraryManager(context)
+                    localLibraryManager.removeRecentlyDeleted(journalId)
+                    fetchJournals(context)
                 }
             } catch (e: Exception) {
                 // Handle error

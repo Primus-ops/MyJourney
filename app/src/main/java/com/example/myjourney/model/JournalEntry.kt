@@ -15,6 +15,7 @@ data class JournalEntry(
     @SerializedName("display_date") val displayDate: String? = null,
     @SerializedName("is_favorite") val isFavorite: Boolean = false,
     @SerializedName("photos") val photos: List<JournalPhoto>? = null,
+    val localPhotoPath: String? = null,
     val imageResId: Int? = null
 ) {
     val coverImageUrl: String? // Automatically gets the first photo's URL

@@ -62,8 +62,10 @@ class SignUpViewModel(private val tokenManager: TokenManager) : ViewModel() {
                     }
                     _signUpState.value = SignUpState.Error(friendlyMsg)
                 }
+            } catch (e: java.io.IOException) {
+                _signUpState.value = SignUpState.Error("No internet connection. Please check your network.")
             } catch (e: Exception) {
-                _signUpState.value = SignUpState.Error("Connection error. Is Laravel running?")
+                _signUpState.value = SignUpState.Error("The server is currently unreachable. Please try again later.")
             }
         }
     }
